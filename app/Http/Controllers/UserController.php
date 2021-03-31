@@ -3,8 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\UserStoreRequest;
+use App\Http\Requests\UserUpdateRequest;
 use App\Models\User;
-use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 
@@ -34,16 +35,35 @@ class UserController extends Controller
 
     public function show(User $user)
     {
-        //
+        return response()->json(['data' => $user]);
     }
 
-    public function update(Request $request, User $user)
+    public function update(UserUpdateRequest $request, User $user)
     {
-        //
+        // Check if current user is 
+        if (Auth::user()->id !== $user->id) {
+            return response()->json(['message' => 'Unauthorized'], 401);
+        }
+
+        $request->validated();
+        $user->update($request->all());
+
+        return response()->json([
+            'message' => 'Update successful',
+            'data' => $user
+        ]);
     }
 
     public function destroy(User $user)
     {
-        //
+        // Check if current user is 
+        if (Auth::user()->id !== $user->id) {
+            return response()->json(['message' => 'Unauthorized'], 401);
+        }
+
+        $user->tokens()->delete();
+        $user->delete();
+
+        return response()->json(['message' => 'Delete successful']);
     }
 }

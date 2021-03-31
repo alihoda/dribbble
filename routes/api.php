@@ -1,7 +1,6 @@
 <?php
 
 use App\Http\Controllers\UserController;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -18,4 +17,10 @@ use Illuminate\Support\Facades\Route;
 Route::name('user.')->prefix('user')->group(function () {
 
     Route::post('register', [UserController::class, 'store'])->name('store');
+    Route::get('{user}', [UserController::class, 'show'])->name('show');
+
+    Route::middleware('auth:api')->group(function () {
+        Route::put('{user}', [UserController::class, 'update'])->name('update');
+        Route::delete('{user}', [UserController::class, 'destroy'])->name('destroy');
+    });
 });
