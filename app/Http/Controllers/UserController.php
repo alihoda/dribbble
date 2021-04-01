@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\UserStoreRequest;
 use App\Http\Requests\UserUpdateRequest;
+use App\Http\Resources\UserResource;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
@@ -14,7 +15,7 @@ class UserController extends Controller
 
     public function index()
     {
-        //
+        return UserResource::collection(User::paginate(5));
     }
 
     public function store(UserStoreRequest $request)
@@ -35,7 +36,7 @@ class UserController extends Controller
 
     public function show(User $user)
     {
-        return response()->json(['data' => $user]);
+        return new UserResource($user);
     }
 
     public function update(UserUpdateRequest $request, User $user)
