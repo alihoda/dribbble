@@ -15,18 +15,6 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-// User crud routes
-Route::name('user.')->prefix('user')->group(function () {
-
-    Route::get('', [UserController::class, 'index'])->name('index');
-    Route::get('{user}', [UserController::class, 'show'])->name('show');
-
-    Route::middleware('auth:api')->group(function () {
-        Route::put('{user}', [UserController::class, 'update'])->name('update');
-        Route::delete('{user}', [UserController::class, 'destroy'])->name('destroy');
-    });
-});
-
 // User auth routes
 Route::post('register', [UserController::class, 'store'])->name('register');
 Route::post('login', [UserLoginController::class, 'login'])->name('login');
