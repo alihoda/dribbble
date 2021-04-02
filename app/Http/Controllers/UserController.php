@@ -12,6 +12,10 @@ use Illuminate\Support\Str;
 
 class UserController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware('auth:api')->only(['update', 'destroy']);
+    }
 
     public function index()
     {

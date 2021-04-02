@@ -1,5 +1,7 @@
 <?php
 
+use App\Http\Controllers\ProductController;
+use App\Http\Controllers\SocialNetworkController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\UserLoginController;
 use Illuminate\Support\Facades\Route;
@@ -16,10 +18,14 @@ use Illuminate\Support\Facades\Route;
 */
 
 // User auth routes
-Route::post('register', [UserController::class, 'store'])->name('register');
+Route::apiResource('user', UserController::class);
 Route::post('login', [UserLoginController::class, 'login'])->name('login');
 Route::post('logout', [UserLoginController::class, 'logout'])
     ->middleware('auth:api')->name('logout');
+
+// Social network route
+Route::apiResource('social', SocialNetworkController::class)
+    ->parameter('social', 'socialNetwork');
 
 // Fallback route
 Route::fallback(function () {
