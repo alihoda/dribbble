@@ -27,6 +27,9 @@ Route::post('logout', [UserLoginController::class, 'logout'])
 Route::apiResource('social', SocialNetworkController::class)
     ->parameter('social', 'socialNetwork');
 
+// Product route
+Route::apiResource('product', ProductController::class);
+
 // Fallback route
 Route::fallback(function () {
     return response()->json(['message' => 'Not Found'], 404);
