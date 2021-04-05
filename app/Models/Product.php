@@ -19,4 +19,14 @@ class Product extends Model
     {
         return $this->belongsTo(User::class);
     }
+
+    // Scopes
+
+    /**
+     * Return latest products based on created_at column
+     */
+    public function scopeLatest($query)
+    {
+        return $query->orderBy(static::CREATED_AT, 'desc');
+    }
 }
