@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Resources\ProductResource;
 use App\Models\Product;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 
 class ProductController extends Controller
 {
@@ -35,9 +36,14 @@ class ProductController extends Controller
         ]);
     }
 
-    public function show(Product $product)
+    public function show($product)
     {
-        return new ProductResource($product);
+        return Cache::tags(['product'])
+            ->remember("product-{$product}", now()->addMinute(), function () use ($product) {
+
+                $prod = Product::with('user')->findOrFail($product);
+                return new ProductResource($prod);
+            });
     }
 
     public function update(Request $request, Product $product)
