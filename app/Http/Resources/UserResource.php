@@ -15,7 +15,8 @@ class UserResource extends JsonResource
             'name' => $this->name,
             'email' => $this->email,
             'username' => $this->username,
-            'updated_at' => $this->updated_at
+            'updated_at' => $this->updated_at,
+            'avatar' => $this->when(true, new ImageResource($this->avatar))
         ];
     }
 }

@@ -42,4 +42,9 @@ class User extends Authenticatable
     {
         return $this->hasMany(Product::class);
     }
+
+    public function avatar()
+    {
+        return $this->morphOne(Image::class, 'imageable');
+    }
 }

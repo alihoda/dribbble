@@ -5,9 +5,11 @@ namespace App\Http\Controllers;
 use App\Http\Requests\UserStoreRequest;
 use App\Http\Requests\UserUpdateRequest;
 use App\Http\Resources\UserResource;
+use App\Models\Image;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
 class UserController extends Controller
@@ -32,9 +34,16 @@ class UserController extends Controller
         if (is_null($user)) {
             return response()->json(['message' => 'Failed registered'], 422);
         }
+        // Check for image in request
+        if ($request->hasFile('thumbnail')) {
+            $path = $request->file('thumbnail')->store('avatars');
+            $user->avatar()->save(Image::make(['path' => $path]));
+        }
+
         return response()->json([
             'message' => 'Successful registered',
-            'data' => $user
+            'data' => $user,
+            'avatar' => $user->avatar->url() ?? ''
         ]);
     }
 
@@ -53,9 +62,22 @@ class UserController extends Controller
         $request->validated();
         $user->update($request->all());
 
+        // Update user avatar if file is uploaded
+        if ($request->hasFile('thumbnail')) {
+            $path = $request->file('thumbnail')->store('avatars');
+            if ($user->avatar) {
+                Storage::delete($user->avatar->path);
+                $user->avatar->path = $path;
+                $user->avatar->save();
+            } else {
+                $user->avatar()->save(Image::make(['path' => $path]));
+            }
+        }
+
         return response()->json([
             'message' => 'Update successful',
-            'data' => $user
+            'data' => $user,
+            'avatar' => $user->avatar->url()
         ]);
     }
 
@@ -66,6 +88,8 @@ class UserController extends Controller
             return response()->json(['message' => 'Unauthorized'], 401);
         }
 
+        Storage::delete($user->avatar->path);
+        $user->avatar()->delete();
         $user->tokens()->delete();
         $user->delete();
 

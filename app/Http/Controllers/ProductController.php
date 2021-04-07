@@ -2,10 +2,13 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Resources\ImageResource;
 use App\Http\Resources\ProductResource;
+use App\Models\Image;
 use App\Models\Product;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Storage;
 
 class ProductController extends Controller
 {
@@ -30,9 +33,18 @@ class ProductController extends Controller
         $request['user_id'] = $request->user()->id;
         $product = Product::create($request->all());
 
+        // Check for image in request
+        if ($request->hasFile('thumbnail')) {
+            foreach ($request->file('thumbnail') as $image) {
+                $path = $image->store('thumbnails');
+                $product->images()->save(Image::make(['path' => $path]));
+            }
+        }
+
         return response()->json([
             'message' => 'Product created successfully',
-            'data' => $product
+            'data' => $product,
+            'images' => ImageResource::collection($product->images()->get())
         ]);
     }
 
@@ -66,8 +78,12 @@ class ProductController extends Controller
     public function destroy(Product $product)
     {
         $this->authorize('delete', $product);
-        $product->delete();
 
+        foreach ($product->images as $image) {
+            Storage::delete($image->path);
+        }
+        $product->images()->delete();
+        $product->delete();
         return response()->json(['message' => 'Product deleted successfully']);
     }
 }
