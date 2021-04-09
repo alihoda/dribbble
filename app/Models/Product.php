@@ -25,6 +25,11 @@ class Product extends Model
         return $this->morphMany(Image::class, 'imageable')->latest();
     }
 
+    public function tags()
+    {
+        return $this->belongsToMany(Tag::class)->withTimestamps();
+    }
+
     // Scopes
 
     /**

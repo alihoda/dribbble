@@ -2,10 +2,10 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Resources\ImageResource;
 use App\Http\Resources\ProductResource;
 use App\Models\Image;
 use App\Models\Product;
+use App\Models\Tag;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Storage;
@@ -20,7 +20,7 @@ class ProductController extends Controller
 
     public function index()
     {
-        return ProductResource::collection(Product::paginate(10));
+        return ProductResource::collection(Product::with(['user', 'tags', 'images'])->get());
     }
 
     public function store(Request $request)
@@ -31,7 +31,11 @@ class ProductController extends Controller
         ]);
 
         $request['user_id'] = $request->user()->id;
+        // get id of tags
+        $tags_id = Tag::getTagsId($request->input('tags'));
+
         $product = Product::create($request->all());
+        $product->tags()->sync($tags_id);
 
         // Check for image in request
         if ($request->hasFile('thumbnail')) {
@@ -43,8 +47,7 @@ class ProductController extends Controller
 
         return response()->json([
             'message' => 'Product created successfully',
-            'data' => $product,
-            'images' => ImageResource::collection($product->images()->get())
+            'data' => new ProductResource($product)
         ]);
     }
 
@@ -52,8 +55,7 @@ class ProductController extends Controller
     {
         return Cache::tags(['product'])
             ->remember("product-{$product}", now()->addMinute(), function () use ($product) {
-
-                $prod = Product::with('user')->findOrFail($product);
+                $prod = Product::with(['user', 'images', 'tags'])->findOrFail($product);
                 return new ProductResource($prod);
             });
     }
@@ -67,7 +69,9 @@ class ProductController extends Controller
             'description' => 'min:10'
         ]);
 
+        $tags_id = Tag::getTagsId($request->input('tags'));
         $product->update($request->all());
+        $product->tags()->sync($tags_id);
 
         return response()->json([
             'message' => 'Product updated successfully',
