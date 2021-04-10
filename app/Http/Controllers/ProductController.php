@@ -20,7 +20,9 @@ class ProductController extends Controller
 
     public function index()
     {
-        return ProductResource::collection(Product::with(['user', 'tags', 'images'])->get());
+        return Cache::tags('product')->remember('products', now()->addMinute(), function () {
+            return ProductResource::collection(Product::with(['user', 'tags', 'images'])->get());
+        });
     }
 
     public function store(Request $request)

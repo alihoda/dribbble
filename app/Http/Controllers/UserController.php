@@ -8,9 +8,9 @@ use App\Http\Resources\UserResource;
 use App\Models\Image;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Str;
 
 class UserController extends Controller
 {
@@ -21,15 +21,15 @@ class UserController extends Controller
 
     public function index()
     {
-        return UserResource::collection(User::paginate(5));
+        return Cache::tags('user')->remember('users', now()->addMinute(), function () {
+            return UserResource::collection(User::all());
+        });
     }
 
     public function store(UserStoreRequest $request)
     {
         $request->validated();
-        $request['password'] = Hash::make($request['password']);
-        $request['remember_token'] = Str::random(10);
-        $user = User::create($request->all());
+        $user = User::createUser($request);
 
         if (is_null($user)) {
             return response()->json(['message' => 'Failed registered'], 422);
@@ -42,14 +42,16 @@ class UserController extends Controller
 
         return response()->json([
             'message' => 'Successful registered',
-            'data' => $user,
-            'avatar' => $user->avatar->url() ?? ''
+            'data' => new UserResource($user),
         ]);
     }
 
-    public function show(User $user)
+    public function show($user)
     {
-        return new UserResource($user);
+        return Cache::tags('user')
+            ->remember("user-{$user}", now()->addMinute(), function () use ($user) {
+                return new UserResource(User::with(['product', 'socialNetwork'])->findOrFail($user));
+            });
     }
 
     public function update(UserUpdateRequest $request, User $user)
@@ -60,6 +62,11 @@ class UserController extends Controller
         }
 
         $request->validated();
+
+        if ($request->hasFile('resume')) {
+            $request['resume_path'] = $request->file('resume')->store('resumes');
+        }
+
         $user->update($request->all());
 
         // Update user avatar if file is uploaded
@@ -88,10 +95,10 @@ class UserController extends Controller
             return response()->json(['message' => 'Unauthorized'], 401);
         }
 
-        Storage::delete($user->avatar->path);
-        $user->avatar()->delete();
-        $user->tokens()->delete();
-        $user->delete();
+        Storage::delete($user->avatar->path);   // delete user's avatar from storage
+        $user->avatar()->delete();              // delete user avatar
+        $user->tokens()->delete();              // delete all user's tokens
+        $user->delete();                        // delete user record
 
         return response()->json(['message' => 'Delete successful']);
     }

@@ -10,11 +10,13 @@ class ProductObserver
 
     public function updating(Product $product)
     {
+        Cache::tags(['product'])->forget('products');
         Cache::tags(['product'])->forget("product-{$product->id}");
     }
 
     public function deleting(Product $product)
     {
+        Cache::tags(['product'])->forget('products');
         Cache::tags(['product'])->forget("product-{$product->id}");
     }
 }
