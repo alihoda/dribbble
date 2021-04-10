@@ -27,7 +27,8 @@ class UserUpdateRequest extends FormRequest
             'email' => 'email',
             'name' => 'bail | min:3 | string',
             'username' => 'bail | min:3 | max:15',
-            'description' => 'min:10'
+            'description' => 'min:10',
+            'resume' => 'bail | file | mimes:pdf'
         ];
     }
 }
