@@ -3,6 +3,7 @@
 namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\Cache;
 
 class DatabaseSeeder extends Seeder
 {
@@ -13,6 +14,19 @@ class DatabaseSeeder extends Seeder
      */
     public function run()
     {
-        // \App\Models\User::factory(10)->create();
+        if ($this->command->confirm('Want to refresh database?', true)) {
+            $this->command->call('migrate:refresh');
+            $this->command->info('Database is seeded');
+        }
+
+        Cache::tags(['product'])->flush();
+        Cache::tags(['user'])->flush();
+
+        $this->call([
+            UserSeeder::class,
+            ProductSeeder::class,
+            TagSeeder::class,
+            ProductTagSeeder::class
+        ]);
     }
 }
