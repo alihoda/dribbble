@@ -22,7 +22,7 @@ class CreateUsersTable extends Migration
             $table->string('email')->unique();
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
-            $table->string('description')->nullable();
+            $table->text('description')->nullable();
             $table->boolean('is_admin')->default(false);
             $table->string('resume_path')->nullable();
             $table->rememberToken();
