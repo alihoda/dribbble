@@ -13,6 +13,7 @@ class SocialNetworkController extends Controller
     public function __construct()
     {
         $this->middleware('auth:api')->except(['index', 'show']);
+        $this->authorizeResource(SocialNetwork::class, 'socialNetwork');
     }
 
     public function index(User $user)
@@ -22,16 +23,14 @@ class SocialNetworkController extends Controller
 
     public function store(Request $request)
     {
-        // validate request data
         $request->validate([
             'type' => 'bail | required | string | min:5',
             'username' => 'bail | required | min:3',
         ]);
-        // create url based on given type
-        $request['url'] = $this->generate_url($request['type'], $request['username']);
-        // set authenticated user's id to user_id
+
         $request['user_id'] = Auth::user()->id;
-        // create new model
+        $request['url'] = $this->url($request->only(['type', 'username']));
+
         $sn = SocialNetwork::create($request->all());
 
         return response()->json([
@@ -43,18 +42,13 @@ class SocialNetworkController extends Controller
     public function show(SocialNetwork $socialNetwork)
     {
         return new SocialResource($socialNetwork);
-        // return response()->json(['url' => $socialNetwork->url]);
     }
 
     public function update(Request $request, SocialNetwork $socialNetwork)
     {
-        // check user authorization
-        $this->authorize('update', $socialNetwork);
-        // validate request data
         $request->validate(['username' => 'required']);
-        // update sn url
-        $request['url'] = $this->generate_url($socialNetwork->type, $request['username']);
-        // update model
+        $request['url'] = $this->url($request->only(['type', 'username']));
+
         $socialNetwork->update($request->only(['username', 'url']));
 
         return response()->json([
@@ -65,24 +59,21 @@ class SocialNetworkController extends Controller
 
     public function destroy(SocialNetwork $socialNetwork)
     {
-        // check user authorization
-        $this->authorize('delete', $socialNetwork);
-        // delete model
         $socialNetwork->delete();
         return response()->json(['message' => 'Deleted successfully']);
     }
 
-    private function generate_url($type, $username)
+    private function url($attributes)
     {
-        switch ($type) {
+        switch ($attributes[0]) {
             case 'instagram':
-                return 'https://www.instagram.com/' . $username;
+                return 'https://www.instagram.com/' . $attributes[1];
             case 'telegram':
-                return 'https://t.me/' . $username;
+                return 'https://t.me/' . $attributes[1];
             case 'linkedin':
-                return 'https://www.linkedin.com/in/' . $username;
+                return 'https://www.linkedin.com/in/' . $attributes[1];
             default:
-                return 'https://twitter.com/' . $username;
+                return 'https://twitter.com/' . $attributes[1];
         }
     }
 }
