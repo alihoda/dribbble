@@ -16,6 +16,7 @@ class ProductController extends Controller
     public function __construct()
     {
         $this->middleware('auth:api')->except(['index', 'show']);
+        $this->authorizeResource(Product::class, 'product');
     }
 
     public function index()
@@ -64,8 +65,6 @@ class ProductController extends Controller
 
     public function update(Request $request, Product $product)
     {
-        $this->authorize('update', $product);
-
         $request->validate([
             'title' => 'min:5',
             'description' => 'min:10'
@@ -83,8 +82,6 @@ class ProductController extends Controller
 
     public function destroy(Product $product)
     {
-        $this->authorize('delete', $product);
-
         foreach ($product->images as $image) {
             Storage::delete($image->path);
         }
