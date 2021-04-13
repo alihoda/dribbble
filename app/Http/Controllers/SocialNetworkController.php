@@ -65,15 +65,15 @@ class SocialNetworkController extends Controller
 
     private function url($attributes)
     {
-        switch ($attributes[0]) {
+        switch ($attributes['type']) {
             case 'instagram':
-                return 'https://www.instagram.com/' . $attributes[1];
+                return 'https://www.instagram.com/' . $attributes['username'];
             case 'telegram':
-                return 'https://t.me/' . $attributes[1];
+                return 'https://t.me/' . $attributes['username'];
             case 'linkedin':
-                return 'https://www.linkedin.com/in/' . $attributes[1];
+                return 'https://www.linkedin.com/in/' . $attributes['username'];
             default:
-                return 'https://twitter.com/' . $attributes[1];
+                return 'https://twitter.com/' . $attributes['username'];
         }
     }
 }
