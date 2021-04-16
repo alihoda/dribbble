@@ -18,7 +18,7 @@ class SocialNetworkPolicy
      */
     public function viewAny(User $user)
     {
-        //
+        return true;
     }
 
     /**

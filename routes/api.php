@@ -24,8 +24,9 @@ Route::post('logout', [UserLoginController::class, 'logout'])
     ->middleware('auth:api')->name('logout');
 
 // Social network route
+Route::get('user/{user}/socials', [SocialNetworkController::class, 'index'])->name('social.index');
 Route::apiResource('social', SocialNetworkController::class)
-    ->parameter('social', 'socialNetwork');
+    ->parameter('social', 'socialNetwork')->except('index');
 
 // Product route
 Route::apiResource('product', ProductController::class);

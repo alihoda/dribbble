@@ -19,8 +19,6 @@ class SocialResource extends JsonResource
             'type' => $this->type,
             'username' => $this->username,
             'url' => $this->url,
-            'user_id' => $this->user_id,
-            'updated_at' => $this->updated_at
         ];
     }
 }

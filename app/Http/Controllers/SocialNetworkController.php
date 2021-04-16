@@ -13,7 +13,6 @@ class SocialNetworkController extends Controller
     public function __construct()
     {
         $this->middleware('auth:api')->except(['index', 'show']);
-        $this->authorizeResource(SocialNetwork::class, 'socialNetwork');
     }
 
     public function index(User $user)
@@ -46,6 +45,7 @@ class SocialNetworkController extends Controller
 
     public function update(Request $request, SocialNetwork $socialNetwork)
     {
+        $this->authorize('update', $socialNetwork);
         $request->validate(['username' => 'required']);
         $request['url'] = $this->url($request->only(['type', 'username']));
 
@@ -59,6 +59,7 @@ class SocialNetworkController extends Controller
 
     public function destroy(SocialNetwork $socialNetwork)
     {
+        $this->authorize('delete', $socialNetwork);
         $socialNetwork->delete();
         return response()->json(['message' => 'Deleted successfully']);
     }
