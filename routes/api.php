@@ -1,7 +1,7 @@
 <?php
 
 use App\Http\Controllers\ProductController;
-use App\Http\Controllers\SocialNetworkController;
+use App\Http\Controllers\TagController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\UserLoginController;
 use Illuminate\Support\Facades\Route;
@@ -23,13 +23,11 @@ Route::post('login', [UserLoginController::class, 'login'])->name('login');
 Route::post('logout', [UserLoginController::class, 'logout'])
     ->middleware('auth:api')->name('logout');
 
-// Social network route
-Route::get('user/{user}/socials', [SocialNetworkController::class, 'index'])->name('social.index');
-Route::apiResource('social', SocialNetworkController::class)
-    ->parameter('social', 'socialNetwork')->except('index');
-
 // Product route
 Route::apiResource('product', ProductController::class);
+
+// Tag route
+Route::apiResource('tag', TagController::class)->only('index', 'show');
 
 // Fallback route
 Route::fallback(function () {
