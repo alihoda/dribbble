@@ -7,7 +7,6 @@ use App\Models\Image;
 use App\Models\Product;
 use App\Models\Tag;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Storage;
 
 class ProductController extends Controller
@@ -16,14 +15,11 @@ class ProductController extends Controller
     public function __construct()
     {
         $this->middleware('auth:api')->except(['index', 'show']);
-        $this->authorizeResource(Product::class, 'product');
     }
 
     public function index()
     {
-        return Cache::tags('product')->remember('products', now()->addMinute(), function () {
-            return ProductResource::collection(Product::with(['user', 'tags', 'images'])->get());
-        });
+        return ProductResource::collection(Product::latest()->with(['user', 'tags', 'image'])->get());
     }
 
     public function store(Request $request)
@@ -42,25 +38,19 @@ class ProductController extends Controller
 
         // Check for image in request
         if ($request->hasFile('thumbnail')) {
-            foreach ($request->file('thumbnail') as $image) {
-                $path = $image->store('thumbnails');
-                $product->images()->save(Image::make(['path' => $path]));
-            }
+            $path = $request->file('thumbnail')->store('thumbnail');
+            $product->image()->save(Image::make(['path' => $path]));
         }
 
         return response()->json([
             'message' => 'Product created successfully',
-            'data' => new ProductResource($product)
+            'product' => new ProductResource($product)
         ]);
     }
 
     public function show($product)
     {
-        return Cache::tags(['product'])
-            ->remember("product-{$product}", now()->addMinute(), function () use ($product) {
-                $prod = Product::with(['user', 'images', 'tags'])->findOrFail($product);
-                return new ProductResource($prod);
-            });
+        return new ProductResource(Product::with(['user', 'image', 'tags'])->findOrFail($product));
     }
 
     public function update(Request $request, Product $product)
@@ -82,10 +72,10 @@ class ProductController extends Controller
 
     public function destroy(Product $product)
     {
-        foreach ($product->images as $image) {
-            Storage::delete($image->path);
+        if (!is_null($product->image)) {
+            Storage::delete($product->image->path);
+            $product->image()->delete();
         }
-        $product->images()->delete();
         $product->delete();
         return response()->json(['message' => 'Product deleted successfully']);
     }

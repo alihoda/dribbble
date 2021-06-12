@@ -8,8 +8,6 @@ use App\Http\Resources\UserResource;
 use App\Models\Image;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Cache;
-use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
 
 class UserController extends Controller
@@ -21,9 +19,7 @@ class UserController extends Controller
 
     public function index()
     {
-        return Cache::tags('user')->remember('users', now()->addMinute(), function () {
-            return UserResource::collection(User::all());
-        });
+        return UserResource::collection(User::all());
     }
 
     public function store(UserStoreRequest $request)
@@ -48,10 +44,7 @@ class UserController extends Controller
 
     public function show($user)
     {
-        return Cache::tags('user')
-            ->remember("user-{$user}", now()->addMinute(), function () use ($user) {
-                return new UserResource(User::with(['product', 'socialNetwork'])->findOrFail($user));
-            });
+        return new UserResource(User::with(['products'])->findOrFail($user));
     }
 
     public function update(UserUpdateRequest $request, User $user)
@@ -83,8 +76,7 @@ class UserController extends Controller
 
         return response()->json([
             'message' => 'Update successful',
-            'data' => $user,
-            'avatar' => $user->avatar->url()
+            'user' => new UserResource($user),
         ]);
     }
 
