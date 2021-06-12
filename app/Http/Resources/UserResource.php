@@ -16,9 +16,9 @@ class UserResource extends JsonResource
             'name' => $this->name,
             'email' => $this->email,
             'username' => $this->username,
-            'created_at' => Carbon::parse($this->created_at)->diffForHumans(),
-            'updated_at' => Carbon::parse($this->updated_at)->diffForHumans(),
-            'avatar' => $this->when(true, new ImageResource($this->avatar))
+            'description' => $this->description,
+            'avatar' => $this->when(true, new ImageResource($this->avatar)),
+            'products' => $this->when(true, ProductUserResource::collection($this->products))
         ];
     }
 }

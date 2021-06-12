@@ -19,9 +19,13 @@ class ProductResource extends JsonResource
             'id' => $this->id,
             'title' => $this->title,
             'description' => $this->description,
-            'user_id' => $this->user_id,
-            'created_at' => Carbon::parse($this->created_at)->diffForHumans(),
-            'images' => $this->when(true, ImageResource::collection($this->images)),
+            'user' =>  [
+                'id' => $this->user_id,
+                'name' => $this->user->name,
+                'avatar' => new ImageResource($this->user->avatar)
+            ],
+            'createdAt' => Carbon::parse($this->created_at)->diffForHumans(),
+            'image' => $this->when(true, new ImageResource($this->image)),
             'tags' => $this->when(true, TagResource::collection($this->tags)),
         ];
     }
