@@ -20,14 +20,14 @@ class Product extends Model
         return $this->belongsTo(User::class);
     }
 
-    public function images()
+    public function image()
     {
-        return $this->morphMany(Image::class, 'imageable')->latest();
+        return $this->morphOne(Image::class, 'imageable');
     }
 
     public function tags()
     {
-        return $this->belongsToMany(Tag::class)->withTimestamps();
+        return $this->belongsToMany(Tag::class);
     }
 
     // Scopes
