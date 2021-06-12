@@ -11,9 +11,9 @@ class Tag extends Model
 
     protected $fillable = ['name', 'product_id'];
 
-    public function product()
+    public function products()
     {
-        return $this->belongsToMany(Product::class)->withTimestamps();
+        return $this->belongsToMany(Product::class)->latest();
     }
 
     // Scopes
