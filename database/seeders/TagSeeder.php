@@ -9,7 +9,7 @@ class TagSeeder extends Seeder
 {
     public function run()
     {
-        $tags = collect(['Web', 'Django', 'React', 'Laravel', 'Front-end', 'Back-end', 'Java-script']);
+        $tags = collect(['web', 'django', 'react', 'laravel', 'front-end', 'back-end', 'java-script']);
         $tags->each(function ($tagName) {
             $tag = new Tag();
             $tag->name = $tagName;
