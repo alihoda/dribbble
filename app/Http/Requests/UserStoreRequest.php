@@ -26,9 +26,8 @@ class UserStoreRequest extends FormRequest
         return [
             'name' => 'bail | required | string | min:3',
             'email' => 'bail | required | email | max:30',
-            'password' => 'bail | required | min:4 | confirmed',
+            'password' => 'bail | required | min:4 | confirmed ',
             'username' => 'bail | required | min:3 | max:15',
-            'description' => 'min:10'
         ];
     }
 }
