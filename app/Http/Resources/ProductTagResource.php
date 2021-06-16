@@ -8,10 +8,13 @@ class ProductTagResource extends JsonResource
 {
     public function toArray($request)
     {
+        $products = $this->products()->latest()->paginate(3);
+
         return [
             'id' => $this->id,
             'name' => $this->name,
-            'products' => ProductResource::collection($this->products)
+            'count' => $this->products_count,
+            'products' => ProductResource::collection($products)->is_collection(true)
         ];
     }
 }

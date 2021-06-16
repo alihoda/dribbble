@@ -19,7 +19,8 @@ class ProductController extends Controller
 
     public function index()
     {
-        return ProductResource::collection(Product::latest()->with(['user', 'tags', 'image'])->get());
+        $productCollection = Product::latest()->with(['user', 'tags', 'image'])->get();
+        return ProductResource::collection($productCollection)->is_collection(true);
     }
 
     public function store(Request $request)
@@ -31,7 +32,7 @@ class ProductController extends Controller
 
         $request['user_id'] = $request->user()->id;
         // get id of tags
-        $tags_id = Tag::getTagsId($request->input('tags'));
+        $tags_id = Tag::getTagsId(json_decode($request->tags));
 
         $product = Product::create($request->all());
         $product->tags()->sync($tags_id);
@@ -44,13 +45,13 @@ class ProductController extends Controller
 
         return response()->json([
             'message' => 'Product created successfully',
-            'product' => new ProductResource($product)
+            'product' => new ProductResource(false, $product)
         ]);
     }
 
     public function show($product)
     {
-        return new ProductResource(Product::with(['user', 'image', 'tags'])->findOrFail($product));
+        return new ProductResource(Product::with(['user', 'image', 'tags'])->findOrFail($product), false);
     }
 
     public function update(Request $request, Product $product)
@@ -60,13 +61,26 @@ class ProductController extends Controller
             'description' => 'min:10'
         ]);
 
-        $tags_id = Tag::getTagsId($request->input('tags'));
+        $tags_id = Tag::getTagsId(json_decode($request->tags));
+
         $product->update($request->all());
         $product->tags()->sync($tags_id);
 
+        // Update user avatar if file is uploaded
+        if ($request->hasFile('thumbnail')) {
+            $path = $request->file('thumbnail')->store('thumbnail');
+            if ($product->image()) {
+                Storage::delete($product->image->path);
+                $product->image->path = $path;
+                $product->image->save();
+            } else {
+                $product->image()->save(Image::make(['path' => $path]));
+            }
+        }
+
         return response()->json([
             'message' => 'Product updated successfully',
-            'data' => $product
+            'product' => new ProductResource(false, $product)
         ]);
     }
 
