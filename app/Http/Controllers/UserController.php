@@ -87,8 +87,10 @@ class UserController extends Controller
             return response()->json(['message' => 'Unauthorized'], 401);
         }
 
-        Storage::delete($user->avatar->path);   // delete user's avatar from storage
-        $user->avatar()->delete();              // delete user avatar
+        if ($user->avatar) {
+            Storage::delete($user->avatar->path);   // delete user's avatar from storage
+            $user->avatar()->delete();              // delete user avatar
+        }
         $user->tokens()->delete();              // delete all user's tokens
         $user->delete();                        // delete user record
 
