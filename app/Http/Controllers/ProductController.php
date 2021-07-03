@@ -45,13 +45,13 @@ class ProductController extends Controller
 
         return response()->json([
             'message' => 'Product created successfully',
-            'product' => new ProductResource(false, $product)
+            'product' => new ProductResource($product)
         ]);
     }
 
     public function show($product)
     {
-        return new ProductResource(Product::with(['user', 'image', 'tags'])->findOrFail($product), false);
+        return new ProductResource(Product::with(['user', 'image', 'tags'])->findOrFail($product));
     }
 
     public function update(Request $request, Product $product)
@@ -80,7 +80,7 @@ class ProductController extends Controller
 
         return response()->json([
             'message' => 'Product updated successfully',
-            'product' => new ProductResource(false, $product)
+            'product' => new ProductResource($product)
         ]);
     }
 
