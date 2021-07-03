@@ -17,7 +17,7 @@ class ProductUserResource extends JsonResource
             'description' => Str::limit($this->description, 100, '...'),
             'createdAt' => Carbon::parse($this->created_at)->diffForHumans(),
             'tags' => $this->when(true, TagResource::collection($this->tags)),
-            'image' => $this->when(true, $this->image->url()),
+            'image' => $this->when(!is_null($this->image), new ImageResource($this->image)),
         ];
     }
 }

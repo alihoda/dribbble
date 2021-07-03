@@ -17,7 +17,7 @@ class UserResource extends JsonResource
             'email' => $this->email,
             'username' => $this->username,
             'description' => $this->description,
-            'avatar' => $this->when(true, new ImageResource($this->avatar)),
+            'avatar' => $this->when(!is_null($this->avatar), new ImageResource($this->avatar)),
             'products' => $this->when(true, ProductUserResource::collection($this->products))
         ];
     }
