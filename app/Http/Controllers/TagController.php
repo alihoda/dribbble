@@ -11,7 +11,7 @@ class TagController extends Controller
     public function index()
     {
         $tags = Tag::has('products')->withCount('products')->get();
-        return ProductTagResource::collection($tags);
+        return ProductTagResource::collection($tags)->is_collection(true);
     }
 
     public function show($tag)
